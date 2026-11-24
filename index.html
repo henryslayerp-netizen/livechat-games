@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yassin Walled | 5-Game Arcade &amp; Live Chat Lounge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Orbitron', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        :root {
+            --accent: #06b6d4;
+            --accent-light: #22d3ee;
+            --accent-dark: #0891b2;
+            --accent-rgb: 6, 182, 212;
+            --secondary-rgb: 16, 185, 129;
+            --bg-deep: #030508;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Flowing ambient gradient backdrop */
+        .flowing-bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(var(--accent-rgb), 0.24), transparent 45%),
+                radial-gradient(circle at 85% 25%, rgba(var(--secondary-rgb), 0.22), transparent 45%),
+                radial-gradient(circle at 50% 85%, rgba(168, 85, 247, 0.20), transparent 50%),
+                linear-gradient(125deg, #040711 0%, #070d1a 50%, #040711 100%);
+            animation: hueFlow 18s ease-in-out infinite alternate;
+        }
+
+        @keyframes hueFlow {
+            0% { filter: hue-rotate(0deg) saturate(1.15); }
+            50% { filter: hue-rotate(115deg) saturate(1.35); }
+            100% { filter: hue-rotate(235deg) saturate(1.25); }
+        }
+
+        .cyber-card {
+            background: rgba(8, 12, 22, 0.84);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .cyber-card:hover {
+            border-color: rgba(var(--accent-rgb), 0.5);
+        }
+
+        .accent-text { color: var(--accent-light); }
+        .accent-bg { background-color: var(--accent); }
+
+        .neon-btn {
+            background: linear-gradient(135deg, var(--accent-light), var(--accent-dark));
+            color: #02050a;
+            font-weight: 800;
+            box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.42);
+            transition: all 0.2s ease;
+        }
+
+        .neon-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 34px rgba(var(--accent-rgb), 0.72);
+            filter: brightness(1.08);
+        }
+
+        .neon-outline-btn {
+            background: rgba(var(--accent-rgb), 0.08);
+            border: 1px solid rgba(var(--accent-rgb), 0.45);
+            color: var(--accent-light);
+            transition: all 0.2s ease;
+        }
+
+        .neon-outline-btn:hover {
+            background: rgba(var(--accent-rgb), 0.2);
+            border-color: var(--accent-light);
+        }
+
+        .hero-gradient-text {
+            background: linear-gradient(135deg, #ffffff 15%, var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Smooth transition for the 3-slashes menu drawer */
+        #slash-menu-panel {
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(-14px) scale(0.985);
+            transition:
+                max-height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.32s ease,
+                transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events: none;
+        }
+
+        #slash-menu-panel.is-open {
+            max-height: 480px;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        #slash-menu-icon {
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        #three-slash-btn.is-active #slash-menu-icon {
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        #arcade-canvas {
+            background: radial-gradient(circle at center, #091326 0%, #04070e 100%);
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 1rem;
+            touch-action: none;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #030508; }
+        ::-webkit-scrollbar-thumb { background: rgba(var(--accent-rgb), 0.45); border-radius: 999px; }
+    </style>
+</head>
+<body class="relative antialiased selection:bg-cyan-500/30 selection:text-white">
+    <!-- Flowing Color Background Layer -->
+    <div class="flowing-bg-layer"></div>
+    <canvas id="bg-flow-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+    <!-- Animated Header with 3-Slashes Menu Transition -->
+    <header class="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#030508]/88 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <a href="#home" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center bg-white/5 border border-white/15"
+                         style="box-shadow: 0 0 22px rgba(var(--accent-rgb), 0.35);">
+                        <i class="fa-solid fa-gamepad accent-text text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="font-display font-extrabold tracking-wider text-white text-base sm:text-lg block leading-none">YASSIN WALLED</span>
+                        <span class="font-mono text-[10px] uppercase tracking-widest accent-text">5-Game Arcade &amp; Live Chat Lounge</span>
+                    </div>
+                </a>
+
+                <nav class="hidden lg:flex items-center gap-6 text-sm font-medium text-slate-300">
+                    <a href="#home" class="hover:text-white transition-colors">Home</a>
+                    <a href="#arcade" class="hover:text-white transition-colors">5 Games</a>
+                    <a href="#chat-section" class="hover:text-white transition-colors flex items-center gap-1.5">
+                        <i class="fa-solid fa-comments accent-text"></i>Live Chat
+                    </a>
+                    <button onclick="openLeaderboardModal()" class="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-trophy text-amber-400"></i>Leaderboard
+                    </button>
+                </nav>
+
+                <div class="flex items-center gap-2.5">
+                    <span id="header-user-pill" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-slate-200">
+                        <i class="fa-solid fa-user accent-text"></i>
+                        <span id="header-user-name">Guest</span>
+                    </span>
+
+                    <button onclick="toggleFlowSpeed()" title="Toggle Flowing Color Speed"
+                        class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-slate-300 hover:text-white cursor-pointer">
+                        <i class="fa-solid fa-wand-magic-sparkles accent-text"></i>
+                        <span id="flow-speed-label">Flow: 1x</span>
+                    </button>
+
+                    <!-- 3-Slashes Menu Button -->
+                    <button id="three-slash-btn" onclick="toggleSlashMenu()" aria-label="Toggle Menu"
+                        class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white flex items-center gap-2 cursor-pointer transition-colors">
+                        <i id="slash-menu-icon" class="fa-solid fa-bars text-base accent-text"></i>
+                        <span class="font-mono text-xs font-bold hidden sm:inline">MENU</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Smoothly Transitioning 3-Slashes Menu Drawer -->
+        <div id="slash-menu-panel" class="border-t border-white/10 bg-[#04070e]/96 backdrop-blur-xl px-4 py-5">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <button onclick="openAuthModal('signin'); closeSlashMenu();"
+                    class="p-4 rounded-2xl bg-white/5 hover:bg-cyan-500/15 border border-white/15 text-left flex items-center gap-3 cursor-pointer transition-all">
+                    <i class="fa-solid fa-right-to-bracket accent-text text-xl"></i>
+                    <div>
+                        <div class="font-display text-sm font-bold text-white">Sign In</div>
+                        <div class="text-xs font-mono text-slate-400">Set your active chat &amp; score handle</div>
+                    </div>
+                </button>
+
+                <button onclick="openAuthModal('signup'); closeSlashMenu();"
+                    class="p-4 rounded-2xl bg-white/5 hover:bg-emerald-500/15 border border-white/15 text-left flex items-center gap-3 cursor-pointer transition-all">
+                    <i class="fa-solid fa-user-plus text-emerald-400 text-xl"></i>
+                    <div>
+                        <div class="font-display text-sm font-bold text-white">Sign Up</div>
+                        <div class="text-xs font-mono text-slate-400">Register a new arcade profile</div>
+                    </div>
+                </button>
+
+                <a href="#chat-section" onclick="closeSlashMenu();"
+                    class="p-4 rounded-2xl bg-white/5 hover:bg-amber-500/15 border border-white/15 text-left flex items-center gap-3 transition-all">
+                    <i class="fa-solid fa-comments text-amber-400 text-xl"></i>
+                    <div>
+                        <div class="font-display text-sm font-bold text-white">Live Chat</div>
+                        <div class="text-xs font-mono text-slate-400">Talk together in real time</div>
+                    </div>
+                </a>
+
+                <a href="https://wa.me/201068268395" target="_blank" rel="noopener noreferrer" onclick="closeSlashMenu();"
+                    class="p-4 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-400/35 text-left flex items-center gap-3 transition-all">
+                    <i class="fa-brands fa-whatsapp text-emerald-400 text-xl"></i>
+                    <div>
+                        <div class="font-display text-sm font-bold text-emerald-300">WhatsApp 01068268395</div>
+                        <div class="text-xs font-mono text-slate-300">Yassin Walled (WhatsApp Only)</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 pt-24 sm:pt-28">
+        <!-- Hero Section -->
+        <section id="home" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-7 space-y-5 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono">
+                        <span class="w-2.5 h-2.5 rounded-full accent-bg animate-ping"></span>
+                        <span class="accent-text font-bold">5 PLAYABLE GAMES • MULTI-USER REAL-TIME CHAT</span>
+                    </div>
+
+                    <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-white">
+                        Built by <span class="hero-gradient-text block sm:inline">Yassin Walled</span>
+                    </h1>
+
+                    <p class="font-mono text-base sm:text-xl accent-text font-semibold">
+                        &gt; 3D Trench • Super Pipe Mario • Street Racer • Snake • Brick Smash
+                    </p>
+
+                    <p class="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                        Play all <strong class="accent-text">5 arcade games</strong>, chat live with other visitors across <strong class="text-white">#general</strong>, <strong class="text-white">#games</strong>, and <strong class="text-white">#squad</strong>, track scores on the <strong class="text-amber-400">Leaderboard</strong>, or message <strong class="text-white">Yassin Walled</strong> on <strong class="text-emerald-400">WhatsApp (01068268395)</strong>.
+                    </p>
+
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
+                        <a href="#arcade" class="neon-btn px-6 py-4 rounded-2xl text-xs sm:text-sm inline-flex items-center gap-2 font-display">
+                            <i class="fa-solid fa-gamepad"></i>
+                            <span>PLAY 5 GAMES</span>
+                        </a>
+                        <a href="#chat-section" class="neon-outline-btn px-6 py-4 rounded-2xl text-xs sm:text-sm inline-flex items-center gap-2 font-display font-bold">
+                            <i class="fa-solid fa-comments"></i>
+                            <span>JOIN LIVE CHAT</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5">
+                    <div class="cyber-card rounded-3xl p-6 sm:p-8">
+                        <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+                            <span class="font-mono text-xs accent-text font-bold">STUDIO // YASSIN_WALLED</span>
+                            <span class="font-mono text-xs text-emerald-400">WHATSAPP ONLY</span>
+                        </div>
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center font-display font-black text-2xl accent-text">YW</div>
+                            <div>
+                                <h2 class="font-display text-xl font-bold text-white">Yassin Walled</h2>
+                                <p class="text-xs font-mono text-slate-300 mt-0.5">5-Game Arcade &amp; Live Chat Studio</p>
+                                <a href="https://wa.me/201068268395" target="_blank" rel="noopener noreferrer"
+                                    class="inline-flex items-center gap-1.5 text-xs font-mono text-emerald-400 hover:text-emerald-300 mt-1.5">
+                                    <i class="fa-brands fa-whatsapp"></i>
+                                    <span>01068268395</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 mb-5">
+                            <div class="p-3.5 rounded-2xl bg-[#04070e]/90 border border-white/10">
+                                <div class="text-[11px] font-mono text-slate-400">PLAYABLE GAMES</div>
+                                <div class="font-display text-2xl font-extrabold text-white mt-1">5</div>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-[#04070e]/90 border border-white/10">
+                                <div class="text-[11px] font-mono text-slate-400">TOTAL BEST PTS</div>
+                                <div id="hero-total-score" class="font-display text-2xl font-extrabold accent-text mt-1">0</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <button onclick="openLeaderboardModal()" class="neon-outline-btn py-2.5 rounded-xl text-xs font-mono font-bold cursor-pointer">
+                                <i class="fa-solid fa-trophy mr-1"></i>Leaderboard
+                            </button>
+                            <button onclick="openAuthModal('signup')" class="neon-btn py-2.5 rounded-xl text-xs font-mono font-bold cursor-pointer">
+                                Sign Up
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5 Playable Games Section -->
+        <section id="arcade" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+            <div class="text-center max-w-2xl mx-auto mb-8">
+                <span class="font-mono text-xs uppercase tracking-widest accent-text font-bold">// 5 Distinct Games</span>
+                <h2 class="font-display text-3xl sm:text-4xl font-black text-white mt-2">Play All 5 Games</h2>
+            </div>
+
+            <!-- 5 Game Selector Cards -->
+            <div id="games-selector-grid" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-7"></div>
+
+            <!-- Active Game Stage -->
+            <div class="cyber-card rounded-3xl p-4 sm:p-6 lg:p-8">
+                <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-5 border-b border-white/10">
+                    <div>
+                        <span id="active-game-badge" class="font-mono text-[11px] uppercase tracking-wider accent-text font-bold">GAME 1 / 5</span>
+                        <h3 id="active-game-title" class="font-display text-xl sm:text-2xl font-bold text-white mt-0.5">3D Trench Runner</h3>
+                        <p id="active-game-desc" class="text-xs sm:text-sm text-slate-400 mt-0.5"></p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <div class="px-3.5 py-2 rounded-xl bg-[#04070e] border border-white/10 text-center min-w-[82px]">
+                            <div class="text-[10px] font-mono text-slate-400">SCORE</div>
+                            <div id="hud-score" class="font-display font-extrabold text-lg accent-text">0</div>
+                        </div>
+                        <div class="px-3.5 py-2 rounded-xl bg-[#04070e] border border-white/10 text-center min-w-[82px]">
+                            <div class="text-[10px] font-mono text-slate-400">BEST</div>
+                            <div id="hud-best" class="font-display font-extrabold text-lg text-white">0</div>
+                        </div>
+                        <button onclick="startOrRestartActiveGame()" class="neon-btn px-5 py-3 rounded-xl text-xs sm:text-sm font-display inline-flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-play"></i>
+                            <span>PLAY / RESTART</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative w-full max-w-3xl mx-auto">
+                    <div class="relative w-full h-[350px] sm:h-[410px] rounded-2xl border border-white/15 overflow-hidden">
+                        <canvas id="arcade-canvas" onclick="triggerPrimaryAction()"></canvas>
+                        <div id="canvas-start-overlay" class="absolute inset-0 bg-[#030508]/75 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+                            <h4 id="overlay-game-name" class="font-display text-2xl sm:text-3xl font-black text-white mb-2">3D Trench Runner</h4>
+                            <p id="overlay-game-hint" class="text-slate-300 text-xs sm:text-sm max-w-md mb-5"></p>
+                            <button onclick="startOrRestartActiveGame()" class="neon-btn px-7 py-3.5 rounded-2xl font-display text-sm inline-flex items-center gap-2 cursor-pointer">
+                                <i class="fa-solid fa-play"></i>
+                                <span>START GAME</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Touch & Mouse Game Controls -->
+                    <div class="mt-4 flex flex-wrap items-center justify-center gap-3">
+                        <button onpointerdown="inputState.left = true" onpointerup="inputState.left = false" onpointerleave="inputState.left = false"
+                            class="px-5 py-3 rounded-xl bg-white/10 active:bg-cyan-400 active:text-slate-950 font-mono text-xs font-bold text-white cursor-pointer select-none">LEFT / UP</button>
+                        <button onpointerdown="triggerPrimaryAction()"
+                            class="px-6 py-3 rounded-xl neon-btn font-display text-xs font-black tracking-wider cursor-pointer select-none">JUMP / ACTION</button>
+                        <button onpointerdown="inputState.right = true" onpointerup="inputState.right = false" onpointerleave="inputState.right = false"
+                            class="px-5 py-3 rounded-xl bg-white/10 active:bg-cyan-400 active:text-slate-950 font-mono text-xs font-bold text-white cursor-pointer select-none">RIGHT / DOWN</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Multi-User Live Chat Lounge -->
+        <section id="chat-section" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+            <div class="cyber-card rounded-3xl p-5 sm:p-8 border border-cyan-400/25">
+                <div class="flex flex-wrap items-start justify-between gap-4 pb-4 mb-5 border-b border-white/10">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <span class="font-mono text-xs uppercase tracking-widest accent-text font-bold">// Multi-User Live Chat Lounge</span>
+                            <span id="chat-sync-status-pill"
+                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-amber-500/15 border border-amber-400/40 text-amber-300">
+                                <span id="chat-sync-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                <span id="chat-sync-label">Connecting Live Sync...</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono bg-white/5 border border-white/15 text-emerald-300">
+                                <i class="fa-solid fa-users text-[10px]"></i>
+                                <span id="chat-online-count">1 Online</span>
+                            </span>
+                        </div>
+                        <h2 class="font-display text-2xl sm:text-3xl font-black text-white mt-2">Chat Together</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-0.5">
+                            Messages sync live across open tabs and connected users. Add a custom Firebase config if hosting outside this sandbox.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="flex flex-wrap items-center gap-1.5" id="chat-room-tabs">
+                            <button onclick="switchChatRoom('general')" data-room="general" class="room-btn px-3.5 py-2 rounded-xl text-xs font-mono font-bold neon-btn cursor-pointer">#general</button>
+                            <button onclick="switchChatRoom('games')" data-room="games" class="room-btn px-3.5 py-2 rounded-xl text-xs font-mono bg-white/5 hover:bg-white/10 text-slate-300 cursor-pointer">#games</button>
+                            <button onclick="switchChatRoom('squad')" data-room="squad" class="room-btn px-3.5 py-2 rounded-xl text-xs font-mono bg-white/5 hover:bg-white/10 text-slate-300 cursor-pointer">#squad</button>
+                        </div>
+                        <button onclick="openFirebaseConfigModal()" title="Configure Firebase Project Credentials"
+                            class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/15 text-xs font-mono text-slate-200 cursor-pointer">
+                            <i class="fa-solid fa-gear mr-1 accent-text"></i>Sync Setup
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Message Feed -->
+                <div id="chat-messages-feed" class="h-80 sm:h-96 overflow-y-auto space-y-3 p-4 rounded-2xl bg-[#04070e]/90 border border-white/10 mb-4"></div>
+
+                <!-- Chat Composer -->
+                <form onsubmit="sendChatMessage(event)" class="flex flex-col sm:flex-row gap-2.5">
+                    <input type="text" id="chat-sender-input" placeholder="Display name"
+                        class="sm:w-44 px-4 py-3 rounded-xl bg-[#04070e] border border-white/15 text-white text-sm focus:outline-none focus:border-cyan-400">
+                    <input type="text" id="chat-text-input" placeholder="Send a message to everyone in the room..." required
+                        class="flex-1 px-4 py-3 rounded-xl bg-[#04070e] border border-white/15 text-white text-sm focus:outline-none focus:border-cyan-400">
+                    <button type="submit" class="neon-btn px-6 py-3 rounded-xl font-display text-xs sm:text-sm inline-flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>SEND</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- WhatsApp-Only Contact Section -->
+        <section id="whatsapp-hub" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+            <div class="cyber-card rounded-3xl p-6 sm:p-10 border border-emerald-400/35">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-5 space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 text-xs font-mono font-bold">
+                            <i class="fa-brands fa-whatsapp text-base"></i>
+                            <span>WHATSAPP ONLY • 01068268395</span>
+                        </div>
+                        <h2 class="font-display text-3xl font-black text-white">Message <span class="accent-text">Yassin Walled</span></h2>
+                        <div class="p-4 rounded-2xl bg-[#04070e] border border-emerald-400/40 flex items-center justify-between">
+                            <div class="font-display text-xl sm:text-2xl font-black text-white">01068268395</div>
+                            <button onclick="copyWhatsApp()" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-mono text-white cursor-pointer">Copy</button>
+                        </div>
+                        <a href="https://wa.me/201068268395" target="_blank" rel="noopener noreferrer"
+                            class="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-display font-extrabold text-sm flex items-center justify-center gap-2">
+                            <i class="fa-brands fa-whatsapp text-xl"></i>
+                            <span>OPEN WHATSAPP CHAT</span>
+                        </a>
+                    </div>
+                    <div class="lg:col-span-7 bg-[#04070e]/90 border border-white/10 rounded-2xl p-5 sm:p-6 space-y-4">
+                        <input type="text" id="wa-name" placeholder="Your name"
+                            class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-emerald-400">
+                        <textarea id="wa-msg" rows="3" placeholder="Hi Yassin Walled, I'd like to ask about..."
+                            class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-emerald-400 resize-none"></textarea>
+                        <button onclick="sendWhatsAppForm()" class="neon-btn w-full py-3.5 rounded-xl font-display text-xs sm:text-sm inline-flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-brands fa-whatsapp text-lg"></i>
+                            <span>SEND TO 01068268395</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Sign In / Sign Up Modal -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="cyber-card rounded-3xl p-6 sm:p-7 w-full max-w-md space-y-4 relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex gap-2 border-b border-white/10 pb-3">
+                <button id="tab-signin" onclick="switchAuthTab('signin')" class="px-4 py-2 rounded-xl text-xs font-mono font-bold neon-btn cursor-pointer">Sign In</button>
+                <button id="tab-signup" onclick="switchAuthTab('signup')" class="px-4 py-2 rounded-xl text-xs font-mono bg-white/5 text-slate-300 cursor-pointer">Sign Up</button>
+            </div>
+            <h3 id="auth-modal-title" class="font-display text-xl font-bold text-white">Sign In</h3>
+            <div id="auth-email-wrap" class="hidden">
+                <label class="block text-xs font-mono text-slate-400 mb-1">Email</label>
+                <input id="auth-email" type="email" placeholder="player@example.com"
+                    class="w-full px-4 py-3 rounded-xl bg-[#04070e] border border-white/15 text-white text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-mono text-slate-400 mb-1">Username</label>
+                <input id="auth-username" type="text" placeholder="CyberPlayer"
+                    class="w-full px-4 py-3 rounded-xl bg-[#04070e] border border-white/15 text-white text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-mono text-slate-400 mb-1">Password</label>
+                <input id="auth-password" type="password" placeholder="••••••••"
+                    class="w-full px-4 py-3 rounded-xl bg-[#04070e] border border-white/15 text-white text-sm">
+            </div>
+            <button onclick="submitAuthForm()" id="auth-submit-btn" class="neon-btn w-full py-3.5 rounded-xl font-display text-xs cursor-pointer">SIGN IN</button>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="cyber-card rounded-3xl p-6 sm:p-7 w-full max-w-lg space-y-4 relative">
+            <button onclick="closeLeaderboardModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center justify-between">
+                <h3 class="font-display text-xl font-bold text-white"><i class="fa-solid fa-trophy text-amber-400 mr-2"></i>5-Game Leaderboard</h3>
+                <span class="font-mono text-xs accent-text">TOP SCORES</span>
+            </div>
+            <div id="leaderboard-list" class="space-y-2 max-h-80 overflow-y-auto pr-1"></div>
+        </div>
+    </div>
+
+    <!-- Firebase Live Sync Setup Modal -->
+    <div id="firebase-config-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="cyber-card rounded-3xl p-6 sm:p-7 w-full max-w-lg space-y-4 relative">
+            <button onclick="closeFirebaseConfigModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="font-display text-xl font-bold text-white"><i class="fa-solid fa-cloud-bolt accent-text mr-2"></i>Live Chat Sync Setup</h3>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                This chat automatically uses environment Firebase credentials when available, and syncs live across tabs in the same browser via <code class="text-cyan-300">BroadcastChannel</code>. To sync across external devices/browsers on your own hosting, paste a Firebase config JSON object below:
+            </p>
+            <textarea id="custom-firebase-json" rows="6" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}'
+                class="w-full p-3.5 rounded-xl bg-[#04070e] border border-white/15 font-mono text-xs text-cyan-200 focus:outline-none focus:border-cyan-400"></textarea>
+            <div class="flex flex-wrap items-center justify-end gap-2.5">
+                <button onclick="clearCustomFirebaseConfig()" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-mono text-slate-200 cursor-pointer">
+                    Reset to Default
+                </button>
+                <button onclick="saveCustomFirebaseConfig()" class="neon-btn px-5 py-2.5 rounded-xl font-display text-xs cursor-pointer">
+                    SAVE &amp; RECONNECT
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-box" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            setDoc,
+            doc,
+            onSnapshot
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        /* ====================================================================
+           1. SHARED CHAT & PRESENCE STATE + MULTI-CHANNEL SYNC
+           ==================================================================== */
+        const ROOMS = ['general', 'games', 'squad'];
+        const DEFAULT_SEED_MESSAGES = {
+            general: [
+                { id: 'seed-g1', author: 'Yassin Walled', text: 'Welcome to the live lounge! Type a message to chat together.', time: 'Just now', ts: 1 }
+            ],
+            games: [
+                { id: 'seed-gm1', author: 'ArcadeHost', text: 'Try 3D Trench Runner, Super Pipe Mario, Turbo Street Racer, Neon Snake, or Brick Smash!', time: 'Just now', ts: 1 }
+            ],
+            squad: [
+                { id: 'seed-sq1', author: 'SquadBot', text: 'Squad room open—coordinate runs and compare high scores.', time: 'Just now', ts: 1 }
+            ]
+        };
+
+        let activeRoom = 'general';
+        let currentUser = localStorage.getItem('yw_user') || 'Guest';
+        const clientSessionId = sessionStorage.getItem('yw_session_id') || (() => {
+            const id = `sess_${Math.random().toString(36).slice(2, 10)}`;
+            sessionStorage.setItem('yw_session_id', id);
+            return id;
+        })();
+
+        // In-memory & same-origin cross-tab message store
+        let roomMessages = {
+            general: [...DEFAULT_SEED_MESSAGES.general],
+            games: [...DEFAULT_SEED_MESSAGES.games],
+            squad: [...DEFAULT_SEED_MESSAGES.squad]
+        };
+        const activeSessions = new Map();
+        activeSessions.set(clientSessionId, { name: currentUser, room: activeRoom, lastSeen: Date.now() });
+
+        const broadcastChannel = typeof BroadcastChannel !== 'undefined'
+            ? new BroadcastChannel('yassin_walled_live_chat_v1')
+            : null;
+
+        let firestoreDb = null;
+        let firestoreUser = null;
+        let firestoreAppId = typeof __app_id !== 'undefined' ? __app_id : 'yassin-walled-5g-arcade';
+        let firestoreUnsubs = [];
+        let isFirestoreConnected = false;
+
+        function updateSyncStatusBadge(mode, detailText) {
+            const pill = document.getElementById('chat-sync-status-pill');
+            const dot = document.getElementById('chat-sync-dot');
+            const label = document.getElementById('chat-sync-label');
+            if (!pill || !dot || !label) return;
+
+            if (mode === 'cloud') {
+                pill.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-emerald-500/15 border border-emerald-400/40 text-emerald-300';
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+                label.textContent = detailText || 'Live Cloud Sync';
+            } else if (mode === 'local-live') {
+                pill.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-cyan-500/15 border border-cyan-400/40 text-cyan-300';
+                dot.className = 'w-2 h-2 rounded-full bg-cyan-400';
+                label.textContent = detailText || 'Browser Tab Sync Active';
+            } else {
+                pill.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-amber-500/15 border border-amber-400/40 text-amber-300';
+                dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+                label.textContent = detailText || 'Local Mode';
+            }
+        }
+
+        function refreshOnlineCount() {
+            const now = Date.now();
+            for (const [sid, info] of activeSessions.entries()) {
+                if (sid !== clientSessionId && now - info.lastSeen > 12000) {
+                    activeSessions.delete(sid);
+                }
+            }
+            const countEl = document.getElementById('chat-online-count');
+            if (countEl) {
+                const n = Math.max(1, activeSessions.size);
+                countEl.textContent = `${n} Online`;
+            }
+        }
+
+        function announcePresence() {
+            activeSessions.set(clientSessionId, { name: currentUser, room: activeRoom, lastSeen: Date.now() });
+            refreshOnlineCount();
+            if (broadcastChannel) {
+                broadcastChannel.postMessage({
+                    type: 'presence',
+                    sessionId: clientSessionId,
+                    name: currentUser,
+                    room: activeRoom,
+                    ts: Date.now()
+                });
+            }
+            if (isFirestoreConnected && firestoreDb && firestoreUser) {
+                setDoc(
+                    doc(firestoreDb, 'artifacts', firestoreAppId, 'public', 'data', 'chat_presence', clientSessionId),
+                    { name: currentUser, room: activeRoom, lastSeen: Date.now() },
+                    { merge: true }
+                ).catch(() => {});
+            }
+        }
+
+        function upsertRoomMessage(room, msg) {
+            if (!ROOMS.includes(room)) return;
+            const list = roomMessages[room] || [];
+            if (msg.id && list.some(item => item.id === msg.id)) return;
+            list.push({
+                id: msg.id || `m_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+                author: msg.author || 'Guest',
+                text: msg.text || '',
+                time: msg.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                ts: msg.ts || Date.now()
+            });
+            list.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+            roomMessages[room] = list.slice(-120);
+            if (room === activeRoom) {
+                renderChatFeed();
+            }
+        }
+
+        function renderChatFeed() {
+            const feed = document.getElementById('chat-messages-feed');
+            if (!feed) return;
+            const list = roomMessages[activeRoom] || [];
+            feed.innerHTML = list.map(m => {
+                const isSelf = m.author === currentUser;
+                return `
+                    <div class="p-3.5 rounded-2xl border ${isSelf ? 'bg-cyan-500/12 border-cyan-400/35 ml-6' : 'bg-white/5 border-white/10 mr-6'}">
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <span class="font-mono text-xs font-bold ${isSelf ? 'accent-text' : 'text-emerald-300'}">${escapeHtml(m.author)}</span>
+                            <span class="font-mono text-[10px] text-slate-400">${escapeHtml(m.time)}</span>
+                        </div>
+                        <p class="text-sm text-slate-100 break-words">${escapeHtml(m.text)}</p>
+                    </div>
+                `;
+            }).join('');
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, c => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[c]));
+        }
+
+        function switchChatRoom(room) {
+            if (!ROOMS.includes(room)) return;
+            activeRoom = room;
+            document.querySelectorAll('.room-btn').forEach(b => {
+                b.className = b.dataset.room === room
+                    ? 'room-btn px-3.5 py-2 rounded-xl text-xs font-mono font-bold neon-btn cursor-pointer'
+                    : 'room-btn px-3.5 py-2 rounded-xl text-xs font-mono bg-white/5 hover:bg-white/10 text-slate-300 cursor-pointer';
+            });
+            announcePresence();
+            renderChatFeed();
+        }
+
+        async function sendChatMessage(e) {
+            e.preventDefault();
+            const senderInp = document.getElementById('chat-sender-input');
+            const textInp = document.getElementById('chat-text-input');
+            const author = (senderInp.value || currentUser || 'Guest').trim();
+            const text = textInp.value.trim();
+            if (!text) return;
+
+            currentUser = author;
+            localStorage.setItem('yw_user', currentUser);
+            document.getElementById('header-user-name').textContent = currentUser;
+
+            const payload = {
+                id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+                room: activeRoom,
+                author,
+                text,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                ts: Date.now()
+            };
+
+            textInp.value = '';
+            upsertRoomMessage(activeRoom, payload);
+
+            if (broadcastChannel) {
+                broadcastChannel.postMessage({ type: 'chat_message', payload });
+            }
+
+            if (isFirestoreConnected && firestoreDb && firestoreUser) {
+                try {
+                    await addDoc(
+                        collection(firestoreDb, 'artifacts', firestoreAppId, 'public', 'data', `chat_${activeRoom}`),
+                        {
+                            author: payload.author,
+                            text: payload.text,
+                            time: payload.time,
+                            ts: payload.ts
+                        }
+                    );
+                } catch (err) {
+                    window.showToast('Sent locally; cloud write retry needed.');
+                }
+            }
+        }
+
+        if (broadcastChannel) {
+            broadcastChannel.onmessage = (ev) => {
+                const data = ev.data;
+                if (!data || typeof data !== 'object') return;
+                if (data.type === 'chat_message' && data.payload) {
+                    upsertRoomMessage(data.payload.room, data.payload);
+                } else if (data.type === 'presence' && data.sessionId) {
+                    activeSessions.set(data.sessionId, {
+                        name: data.name || 'Guest',
+                        room: data.room || 'general',
+                        lastSeen: Date.now()
+                    });
+                    refreshOnlineCount();
+                }
+            };
+        }
+
+        function resolveFirebaseConfig() {
+            const customRaw = sessionStorage.getItem('yw_custom_firebase_json');
+            if (customRaw) {
+                try {
+                    const parsed = JSON.parse(customRaw);
+                    if (parsed && parsed.apiKey && parsed.projectId) {
+                        return { config: parsed, source: 'custom' };
+                    }
+                } catch (_) {}
+            }
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                try {
+                    const envCfg = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+                    if (envCfg && envCfg.apiKey && envCfg.projectId) {
+                        return { config: envCfg, source: 'env' };
+                    }
+                } catch (_) {}
+            }
+            return null;
+        }
+
+        async function initRealtimeBackend() {
+            firestoreUnsubs.forEach(fn => { try { fn(); } catch (_) {} });
+            firestoreUnsubs = [];
+            isFirestoreConnected = false;
+
+            const resolved = resolveFirebaseConfig();
+            if (!resolved) {
+                updateSyncStatusBadge('local-live', broadcastChannel ? 'Live Tab Sync' : 'Local Session Chat');
+                return;
+            }
+
+            try {
+                const app = initializeApp(resolved.config, `yw_app_${Date.now()}`);
+                const auth = getAuth(app);
+                firestoreDb = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && resolved.source === 'env') {
+                    const cred = await signInWithCustomToken(auth, __initial_auth_token);
+                    firestoreUser = cred.user;
+                } else {
+                    const cred = await signInAnonymously(auth);
+                    firestoreUser = cred.user;
+                }
+
+                if (!firestoreUser) {
+                    updateSyncStatusBadge('local-live', 'Live Tab Sync');
+                    return;
+                }
+
+                isFirestoreConnected = true;
+                updateSyncStatusBadge('cloud', 'Live Cloud Sync (Firestore)');
+
+                ROOMS.forEach(room => {
+                    const colRef = collection(firestoreDb, 'artifacts', firestoreAppId, 'public', 'data', `chat_${room}`);
+                    const unsub = onSnapshot(
+                        colRef,
+                        (snap) => {
+                            snap.docChanges().forEach(chg => {
+                                if (chg.type === 'added' || chg.type === 'modified') {
+                                    const d = chg.doc.data() || {};
+                                    upsertRoomMessage(room, {
+                                        id: chg.doc.id,
+                                        author: d.author || 'Guest',
+                                        text: d.text || '',
+                                        time: d.time || '',
+                                        ts: d.ts || Date.now()
+                                    });
+                                }
+                            });
+                        },
+                        () => {
+                            isFirestoreConnected = false;
+                            updateSyncStatusBadge('local-live', 'Live Tab Sync');
+                        }
+                    );
+                    firestoreUnsubs.push(unsub);
+                });
+
+                const presCol = collection(firestoreDb, 'artifacts', firestoreAppId, 'public', 'data', 'chat_presence');
+                const presUnsub = onSnapshot(
+                    presCol,
+                    (snap) => {
+                        const now = Date.now();
+                        snap.forEach(docSnap => {
+                            const p = docSnap.data() || {};
+                            if (now - (p.lastSeen || 0) < 20000) {
+                                activeSessions.set(docSnap.id, {
+                                    name: p.name || 'Guest',
+                                    room: p.room || 'general',
+                                    lastSeen: p.lastSeen || now
+                                });
+                            }
+                        });
+                        refreshOnlineCount();
+                    },
+                    () => {}
+                );
+                firestoreUnsubs.push(presUnsub);
+                announcePresence();
+            } catch (err) {
+                isFirestoreConnected = false;
+                updateSyncStatusBadge('local-live', 'Live Tab Sync');
+            }
+        }
+
+        /* ====================================================================
+           2. UI MODALS, 3-SLASH MENU, FLOWING CANVAS & WHATSAPP
+           ==================================================================== */
+        let flowSpeed = 1;
+        window.toggleFlowSpeed = function () {
+            flowSpeed = flowSpeed === 1 ? 2.6 : 1;
+            document.getElementById('flow-speed-label').textContent = `Flow: ${flowSpeed === 1 ? '1x' : '3x'}`;
+        };
+
+        window.showToast = function (msg) {
+            const box = document.getElementById('toast-box');
+            const el = document.createElement('div');
+            el.className = 'pointer-events-auto px-4 py-3 rounded-2xl bg-[#090f1c]/95 border border-white/15 text-white text-xs sm:text-sm shadow-xl transition-opacity duration-300';
+            el.textContent = msg;
+            box.appendChild(el);
+            setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 2400);
+        };
+
+        let slashMenuOpen = false;
+        window.toggleSlashMenu = function () {
+            slashMenuOpen = !slashMenuOpen;
+            document.getElementById('slash-menu-panel').classList.toggle('is-open', slashMenuOpen);
+            document.getElementById('three-slash-btn').classList.toggle('is-active', slashMenuOpen);
+        };
+        window.closeSlashMenu = function () {
+            slashMenuOpen = false;
+            document.getElementById('slash-menu-panel').classList.remove('is-open');
+            document.getElementById('three-slash-btn').classList.remove('is-active');
+        };
+
+        let authMode = 'signin';
+        window.openAuthModal = function (mode = 'signin') {
+            document.getElementById('auth-modal').classList.remove('hidden');
+            window.switchAuthTab(mode);
+        };
+        window.closeAuthModal = function () {
+            document.getElementById('auth-modal').classList.add('hidden');
+        };
+        window.switchAuthTab = function (mode) {
+            authMode = mode;
+            const isUp = mode === 'signup';
+            document.getElementById('tab-signin').className = !isUp ? 'px-4 py-2 rounded-xl text-xs font-mono font-bold neon-btn cursor-pointer' : 'px-4 py-2 rounded-xl text-xs font-mono bg-white/5 text-slate-300 cursor-pointer';
+            document.getElementById('tab-signup').className = isUp ? 'px-4 py-2 rounded-xl text-xs font-mono font-bold neon-btn cursor-pointer' : 'px-4 py-2 rounded-xl text-xs font-mono bg-white/5 text-slate-300 cursor-pointer';
+            document.getElementById('auth-modal-title').textContent = isUp ? 'Create Account (Sign Up)' : 'Sign In';
+            document.getElementById('auth-email-wrap').classList.toggle('hidden', !isUp);
+            document.getElementById('auth-submit-btn').textContent = isUp ? 'SIGN UP' : 'SIGN IN';
+        };
+        window.submitAuthForm = function () {
+            const uname = (document.getElementById('auth-username').value || '').trim() || 'PlayerOne';
+            currentUser = uname;
+            localStorage.setItem('yw_user', currentUser);
+            document.getElementById('header-user-name').textContent = currentUser;
+            document.getElementById('chat-sender-input').value = currentUser;
+            announcePresence();
+            window.syncLeaderboardWithCurrentScore();
+            renderChatFeed();
+            window.closeAuthModal();
+            window.showToast(authMode === 'signup' ? `Account created for ${currentUser}!` : `Signed in as ${currentUser}!`);
+        };
+
+        window.openFirebaseConfigModal = function () {
+            document.getElementById('custom-firebase-json').value = sessionStorage.getItem('yw_custom_firebase_json') || '';
+            document.getElementById('firebase-config-modal').classList.remove('hidden');
+        };
+        window.closeFirebaseConfigModal = function () {
+            document.getElementById('firebase-config-modal').classList.add('hidden');
+        };
+        window.saveCustomFirebaseConfig = function () {
+            const raw = document.getElementById('custom-firebase-json').value.trim();
+            if (!raw) {
+                window.showToast('Paste a valid Firebase JSON config first.');
+                return;
+            }
+            try {
+                const parsed = JSON.parse(raw);
+                if (!parsed.apiKey || !parsed.projectId) {
+                    window.showToast('Config needs apiKey and projectId.');
+                    return;
+                }
+                sessionStorage.setItem('yw_custom_firebase_json', JSON.stringify(parsed));
+                window.closeFirebaseConfigModal();
+                initRealtimeBackend();
+                window.showToast('Firebase config saved. Reconnecting live sync...');
+            } catch (_) {
+                window.showToast('Invalid JSON format.');
+            }
+        };
+        window.clearCustomFirebaseConfig = function () {
+            sessionStorage.removeItem('yw_custom_firebase_json');
+            document.getElementById('custom-firebase-json').value = '';
+            window.closeFirebaseConfigModal();
+            initRealtimeBackend();
+            window.showToast('Reset to default sync.');
+        };
+
+        window.copyWhatsApp = function () {
+            const inp = document.createElement('input');
+            inp.value = '01068268395';
+            document.body.appendChild(inp);
+            inp.select();
+            document.execCommand('copy');
+            document.body.removeChild(inp);
+            window.showToast('Copied WhatsApp: 01068268395');
+        };
+
+        window.sendWhatsAppForm = function () {
+            const name = document.getElementById('wa-name').value.trim();
+            const msg = document.getElementById('wa-msg').value.trim();
+            let full = 'Hello Yassin Walled!';
+            if (name) full += ` Name: ${name}.`;
+            if (msg) full += ` ${msg}`;
+            window.open(`https://wa.me/201068268395?text=${encodeURIComponent(full)}`, '_blank', 'noopener,noreferrer');
+        };
+
+        function initFlowingCanvas() {
+            const c = document.getElementById('bg-flow-canvas');
+            const g = c.getContext('2d');
+            let w = (c.width = window.innerWidth), h = (c.height = window.innerHeight);
+            window.addEventListener('resize', () => { w = c.width = window.innerWidth; h = c.height = window.innerHeight; });
+            let hue = 180;
+            const pts = Array.from({ length: 50 }, () => ({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                vx: (Math.random() - 0.5) * 0.85,
+                vy: (Math.random() - 0.5) * 0.85,
+                r: Math.random() * 2.2 + 0.9
+            }));
+            function frame() {
+                hue = (hue + 0.28 * flowSpeed) % 360;
+                const hue2 = (hue + 105) % 360;
+                document.documentElement.style.setProperty('--accent', `hsl(${hue}, 88%, 55%)`);
+                document.documentElement.style.setProperty('--accent-light', `hsl(${hue}, 95%, 65%)`);
+                document.documentElement.style.setProperty('--accent-dark', `hsl(${hue2}, 85%, 42%)`);
+                g.clearRect(0, 0, w, h);
+                for (const p of pts) {
+                    p.x = (p.x + p.vx * flowSpeed + w) % w;
+                    p.y = (p.y + p.vy * flowSpeed + h) % h;
+                    g.beginPath();
+                    g.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    g.fillStyle = `hsla(${hue}, 90%, 65%, 0.55)`;
+                    g.fill();
+                }
+                requestAnimationFrame(frame);
+            }
+            frame();
+        }
+
+        /* ====================================================================
+           3. THE 5 PLAYABLE GAMES + LEADERBOARD
+           ==================================================================== */
+        const GAMES_CATALOG = [
+            { id: 1, key: 'cyber_3d_trench', name: '3D Trench Runner',   icon: '🧊', desc: 'Steer left/right in 3D perspective to dodge red cubes and grab gold coins.' },
+            { id: 2, key: 'mario_runner',    name: 'Super Pipe Mario',   icon: '🍄', desc: 'Jump (Space / Tap / Up) over pipes and collect gold coins.' },
+            { id: 3, key: 'street_racer',    name: 'Turbo Street Racer', icon: '🏎️', desc: 'Dodge traffic cars across 3 lanes and grab emerald nitro boosts.' },
+            { id: 4, key: 'neon_snake',      name: 'Neon Snake',         icon: '🐍', desc: 'Eat gold orbs and grow without hitting walls or your tail.' },
+            { id: 5, key: 'brick_smash',     name: 'Brick Smash',        icon: '🧱', desc: 'Bounce the ball with your paddle to break all neon bricks.' }
+        ];
+
+        const arcadeCanvas = document.getElementById('arcade-canvas');
+        const ctx = arcadeCanvas.getContext('2d');
+
+        let activeGameObj = GAMES_CATALOG[0], score = 0, running = false;
+        let rafId = null, cState = {};
+        const inputState = { left: false, right: false }, keys = {};
+        const bestMap = JSON.parse(localStorage.getItem('yw_5g_best') || '{}');
+
+        let leaderboard = JSON.parse(localStorage.getItem('yw_5g_lb') || 'null') || [
+            { name: 'Yassin Walled', score: 450, game: '3D Trench Runner' },
+            { name: 'PipeMaster', score: 320, game: 'Super Pipe Mario' },
+            { name: 'DriftKing', score: 270, game: 'Turbo Street Racer' },
+            { name: 'ViperSnake', score: 190, game: 'Neon Snake' }
+        ];
+
+        window.syncLeaderboardWithCurrentScore = function () {
+            const totalBest = Object.values(bestMap).reduce((a, b) => a + Number(b || 0), 0);
+            if (totalBest <= 0) return;
+            const existing = leaderboard.find(r => r.name === currentUser);
+            if (existing) {
+                if (totalBest > existing.score) { existing.score = totalBest; existing.game = activeGameObj.name; }
+            } else {
+                leaderboard.push({ name: currentUser, score: totalBest, game: activeGameObj.name });
+            }
+            leaderboard.sort((a, b) => b.score - a.score);
+            leaderboard = leaderboard.slice(0, 10);
+            localStorage.setItem('yw_5g_lb', JSON.stringify(leaderboard));
+        };
+
+        window.openLeaderboardModal = function () {
+            window.syncLeaderboardWithCurrentScore();
+            document.getElementById('leaderboard-list').innerHTML = leaderboard.map((row, i) => `
+                <div class="p-3.5 rounded-2xl bg-[#04070e] border border-white/10 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="font-display text-sm font-black ${i === 0 ? 'text-amber-400' : i === 1 ? 'text-slate-200' : i === 2 ? 'text-amber-600' : 'text-slate-400'}">#${i + 1}</span>
+                        <div>
+                            <div class="font-bold text-sm text-white">${escapeHtml(row.name)}</div>
+                            <div class="text-[11px] font-mono text-slate-400">${escapeHtml(row.game)}</div>
+                        </div>
+                    </div>
+                    <div class="font-display text-base font-extrabold accent-text">${Number(row.score).toLocaleString()}</div>
+                </div>
+            `).join('');
+            document.getElementById('leaderboard-modal').classList.remove('hidden');
+        };
+        window.closeLeaderboardModal = function () {
+            document.getElementById('leaderboard-modal').classList.add('hidden');
+        };
+
+        function saveBest(key, val) {
+            if (val > (bestMap[key] || 0)) {
+                bestMap[key] = val;
+                localStorage.setItem('yw_5g_best', JSON.stringify(bestMap));
+                updateTotalBest();
+                window.syncLeaderboardWithCurrentScore();
+            }
+            document.getElementById('hud-best').textContent = bestMap[key] || 0;
+        }
+
+        function updateTotalBest() {
+            const sum = Object.values(bestMap).reduce((a, b) => a + Number(b || 0), 0);
+            document.getElementById('hero-total-score').textContent = sum.toLocaleString();
+        }
+
+        function setScore(val) {
+            score = val;
+            document.getElementById('hud-score').textContent = score;
+            saveBest(activeGameObj.key, score);
+        }
+
+        function renderGameSelectorGrid() {
+            document.getElementById('games-selector-grid').innerHTML = GAMES_CATALOG.map(g => `
+                <button type="button" onclick="selectGameByKey('${g.key}')"
+                    class="p-4 rounded-2xl border text-left transition-all cursor-pointer ${g.key === activeGameObj.key ? 'border-cyan-400 bg-cyan-500/15' : 'border-white/10 bg-[#050914]/85 hover:border-white/30'}">
+                    <div class="flex items-center justify-between text-sm font-mono mb-1.5"><span>${g.icon}</span><span class="text-[11px] accent-text font-bold">#0${g.id}</span></div>
+                    <div class="font-display text-sm font-bold text-white truncate">${g.name}</div>
+                    <div class="text-[11px] font-mono text-slate-400 mt-1">Best: ${bestMap[g.key] || 0}</div>
+                </button>
+            `).join('');
+        }
+
+        window.selectGameByKey = function (key) {
+            const found = GAMES_CATALOG.find(g => g.key === key);
+            if (!found) return;
+            activeGameObj = found;
+            cancelAnimationFrame(rafId);
+            running = false;
+            renderGameSelectorGrid();
+            document.getElementById('active-game-badge').textContent = `GAME ${found.id} / 5`;
+            document.getElementById('active-game-title').textContent = found.name;
+            document.getElementById('active-game-desc').textContent = found.desc;
+            document.getElementById('overlay-game-name').textContent = found.name;
+            document.getElementById('overlay-game-hint').textContent = found.desc;
+            document.getElementById('hud-best').textContent = bestMap[found.key] || 0;
+            setScore(0);
+            resizeCanvas();
+            document.getElementById('canvas-start-overlay').classList.remove('hidden');
+        };
+
+        function resizeCanvas() {
+            const box = arcadeCanvas.parentElement;
+            if (!box) return;
+            arcadeCanvas.width = box.clientWidth;
+            arcadeCanvas.height = box.clientHeight;
+        }
+
+        window.startOrRestartActiveGame = function () {
+            cancelAnimationFrame(rafId);
+            setScore(0);
+            resizeCanvas();
+            document.getElementById('canvas-start-overlay').classList.add('hidden');
+            running = true;
+            initCanvasState(activeGameObj.key);
+            rafId = requestAnimationFrame(loopCanvas);
+        };
+
+        function endCanvasRun() {
+            running = false;
+            cancelAnimationFrame(rafId);
+            document.getElementById('overlay-game-name').textContent = `GAME OVER • SCORE: ${score}`;
+            document.getElementById('canvas-start-overlay').classList.remove('hidden');
+        }
+
+        function initCanvasState(key) {
+            const w = arcadeCanvas.width, h = arcadeCanvas.height;
+            cState = { key, w, h, px: w / 2, py: h / 2, vy: 0, items: [], lastSpawn: 0, lastStep: 0 };
+            if (key === 'cyber_3d_trench') { cState.px = 0; }
+            else if (key === 'mario_runner') { cState.px = 80; cState.py = h - 56; cState.vy = 0; cState.grounded = true; }
+            else if (key === 'street_racer') { cState.px = w / 2; }
+            else if (key === 'neon_snake') { cState.cell = 20; cState.snake = [{ x: 6, y: 6 }, { x: 5, y: 6 }]; cState.dir = { x: 1, y: 0 }; cState.food = { x: 11, y: 7 }; }
+            else if (key === 'brick_smash') {
+                cState.px = w / 2 - 52; cState.pw = 104; cState.bx = w / 2; cState.by = h - 38; cState.bdx = 4; cState.bdy = -4.2;
+                const cols = Math.max(5, Math.floor(w / 78));
+                for (let r = 0; r < 3; r++) for (let c = 0; c < cols; c++) {
+                    cState.items.push({ x: 14 + c * ((w - 28) / cols), y: 34 + r * 22, w: ((w - 28) / cols) - 6, h: 16, alive: true });
+                }
+            }
+        }
+
+        window.triggerPrimaryAction = function () {
+            if (!running) return;
+            if (cState.key === 'mario_runner' && cState.grounded) {
+                cState.vy = -10.5;
+                cState.grounded = false;
+            }
+        };
+
+        function loopCanvas(ts) {
+            if (!running) return;
+            const { key, w, h } = cState;
+            ctx.clearRect(0, 0, w, h);
+            const mL = keys['ArrowLeft'] || keys['a'] || inputState.left;
+            const mR = keys['ArrowRight'] || keys['d'] || inputState.right;
+
+            if (key === 'cyber_3d_trench') {
+                const vpX = w / 2, vpY = h * 0.34;
+                if (mL) cState.px = Math.max(-1.0, cState.px - 0.045);
+                if (mR) cState.px = Math.min(1.0, cState.px + 0.045);
+                ctx.strokeStyle = 'rgba(34, 211, 238, 0.25)'; ctx.lineWidth = 1.5;
+                for (let xNorm = -1.2; xNorm <= 1.2; xNorm += 0.4) {
+                    ctx.beginPath(); ctx.moveTo(vpX + xNorm * 40, vpY); ctx.lineTo(vpX + xNorm * (w * 0.55), h); ctx.stroke();
+                }
+                for (let z = 0.15; z <= 1.0; z += 0.2) {
+                    const yLine = vpY + (h - vpY) * (z * z);
+                    ctx.beginPath(); ctx.moveTo(vpX - (w * 0.55) * z, yLine); ctx.lineTo(vpX + (w * 0.55) * z, yLine); ctx.stroke();
+                }
+                if (ts - cState.lastSpawn > 750) {
+                    cState.lastSpawn = ts;
+                    const lanes = [-0.65, 0, 0.65];
+                    cState.items.push({ xNorm: lanes[Math.floor(Math.random() * lanes.length)], z: 0.05, passed: false, isCoin: Math.random() < 0.25 });
+                }
+                for (let i = cState.items.length - 1; i >= 0; i--) {
+                    const ob = cState.items[i]; ob.z += 0.014;
+                    const scale = ob.z * ob.z;
+                    const sx = vpX + ob.xNorm * (w * 0.48) * scale;
+                    const sy = vpY + (h - vpY - 24) * scale;
+                    const size = 12 + 44 * scale;
+                    if (ob.z > 0.84 && ob.z < 0.98 && Math.abs(ob.xNorm - cState.px) < 0.26) {
+                        if (ob.isCoin) { cState.items.splice(i, 1); setScore(score + 20); continue; }
+                        else return endCanvasRun();
+                    }
+                    if (!ob.passed && ob.z >= 1.0) { ob.passed = true; if (!ob.isCoin) setScore(score + 5); }
+                    ctx.fillStyle = ob.isCoin ? '#fbbf24' : '#f43f5e';
+                    ctx.fillRect(sx - size / 2, sy - size / 2, size, size);
+                    if (ob.z > 1.15) cState.items.splice(i, 1);
+                }
+                const psx = vpX + cState.px * (w * 0.48), psy = h - 34;
+                ctx.fillStyle = '#22d3ee';
+                ctx.beginPath(); ctx.moveTo(psx, psy - 18); ctx.lineTo(psx + 22, psy + 10); ctx.lineTo(psx - 22, psy + 10); ctx.closePath(); ctx.fill();
+            } else if (key === 'mario_runner') {
+                const groundY = h - 56;
+                ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, w, groundY);
+                ctx.fillStyle = '#10b981'; ctx.fillRect(0, groundY, w, h - groundY);
+                if (!cState.grounded) {
+                    cState.vy += 0.48; cState.py += cState.vy;
+                    if (cState.py >= groundY) { cState.py = groundY; cState.vy = 0; cState.grounded = true; }
+                }
+                if (ts - cState.lastSpawn > 1250) {
+                    cState.lastSpawn = ts;
+                    const isCoin = Math.random() < 0.35;
+                    cState.items.push({ x: w + 20, y: isCoin ? groundY - 68 : groundY - 26, w: isCoin ? 18 : 28, h: isCoin ? 18 : 28, isCoin, passed: false });
+                }
+                for (let i = cState.items.length - 1; i >= 0; i--) {
+                    const it = cState.items[i]; it.x -= 4.4;
+                    if (it.isCoin) {
+                        ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(it.x + 9, it.y + 9, 9, 0, Math.PI * 2); ctx.fill();
+                        if (Math.abs(it.x - cState.px) < 24 && Math.abs(it.y - (cState.py - 18)) < 26) { cState.items.splice(i, 1); setScore(score + 15); continue; }
+                    } else {
+                        ctx.fillStyle = '#ef4444'; ctx.fillRect(it.x, it.y, it.w, it.h);
+                        if (!it.passed && it.x + it.w < cState.px) { it.passed = true; setScore(score + 10); }
+                        if (cState.px + 12 > it.x && cState.px - 12 < it.x + it.w && cState.py > it.y) return endCanvasRun();
+                    }
+                    if (it.x < -40) cState.items.splice(i, 1);
+                }
+                ctx.fillStyle = '#ef4444'; ctx.fillRect(cState.px - 11, cState.py - 28, 22, 8);
+                ctx.fillStyle = '#3b82f6'; ctx.fillRect(cState.px - 10, cState.py - 20, 20, 20);
+            } else if (key === 'street_racer') {
+                const roadW = Math.min(300, w * 0.68), roadX = (w - roadW) / 2, laneW = roadW / 3;
+                ctx.fillStyle = '#111827'; ctx.fillRect(roadX, 0, roadW, h);
+                ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.setLineDash([18, 16]);
+                for (let l = 1; l < 3; l++) { ctx.beginPath(); ctx.moveTo(roadX + l * laneW, 0); ctx.lineTo(roadX + l * laneW, h); ctx.stroke(); }
+                ctx.setLineDash([]);
+                if (mL) cState.px = Math.max(roadX + 20, cState.px - 5.5);
+                if (mR) cState.px = Math.min(roadX + roadW - 20, cState.px + 5.5);
+                if (ts - cState.lastSpawn > 720) {
+                    cState.lastSpawn = ts;
+                    const chosenLane = Math.floor(Math.random() * 3);
+                    cState.items.push({ x: roadX + chosenLane * laneW + laneW / 2, y: -40, vy: 4.5, nitro: Math.random() < 0.25, passed: false });
+                }
+                for (let i = cState.items.length - 1; i >= 0; i--) {
+                    const car = cState.items[i]; car.y += car.vy;
+                    if (!car.passed && car.y > h - 60) { car.passed = true; setScore(score + (car.nitro ? 20 : 10)); }
+                    if (Math.abs(car.x - cState.px) < 26 && Math.abs(car.y - (h - 56)) < 38) {
+                        if (car.nitro) { cState.items.splice(i, 1); setScore(score + 25); continue; }
+                        else return endCanvasRun();
+                    }
+                    ctx.fillStyle = car.nitro ? '#34d399' : '#f43f5e';
+                    ctx.fillRect(car.x - 15, car.y - 24, 30, 48);
+                    if (car.y > h + 50) cState.items.splice(i, 1);
+                }
+                ctx.fillStyle = '#22d3ee'; ctx.fillRect(cState.px - 15, h - 80, 30, 48);
+            } else if (key === 'neon_snake') {
+                const cols = Math.floor(w / cState.cell), rows = Math.floor(h / cState.cell);
+                if (ts - cState.lastStep > 125) {
+                    cState.lastStep = ts;
+                    const nh = { x: cState.snake[0].x + cState.dir.x, y: cState.snake[0].y + cState.dir.y };
+                    if (nh.x < 0 || nh.x >= cols || nh.y < 0 || nh.y >= rows || cState.snake.some(s => s.x === nh.x && s.y === nh.y)) return endCanvasRun();
+                    cState.snake.unshift(nh);
+                    if (nh.x === cState.food.x && nh.y === cState.food.y) { setScore(score + 10); cState.food = { x: Math.floor(Math.random() * cols), y: Math.floor(Math.random() * rows) }; }
+                    else cState.snake.pop();
+                }
+                ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(cState.food.x * cState.cell + 10, cState.food.y * cState.cell + 10, 7, 0, Math.PI * 2); ctx.fill();
+                cState.snake.forEach((s, idx) => { ctx.fillStyle = idx === 0 ? '#34d399' : '#10b981'; ctx.fillRect(s.x * cState.cell + 2, s.y * cState.cell + 2, cState.cell - 4, cState.cell - 4); });
+            } else if (key === 'brick_smash') {
+                if (mL) cState.px -= 6.5; if (mR) cState.px += 6.5;
+                cState.px = Math.max(0, Math.min(w - cState.pw, cState.px));
+                cState.bx += cState.bdx; cState.by += cState.bdy;
+                if (cState.bx < 8 || cState.bx > w - 8) cState.bdx *= -1;
+                if (cState.by < 8) cState.bdy *= -1;
+                if (cState.by > h - 28 && cState.bx > cState.px && cState.bx < cState.px + cState.pw) cState.bdy = -Math.abs(cState.bdy);
+                if (cState.by > h) return endCanvasRun();
+                let rem = 0;
+                for (const b of cState.items) {
+                    if (!b.alive) continue; rem++;
+                    if (cState.bx > b.x && cState.bx < b.x + b.w && cState.by > b.y && cState.by < b.y + b.h) { b.alive = false; cState.bdy *= -1; setScore(score + 20); break; }
+                    ctx.fillStyle = '#22d3ee'; ctx.fillRect(b.x, b.y, b.w, b.h);
+                }
+                if (rem === 0) initCanvasState('brick_smash');
+                ctx.fillStyle = '#34d399'; ctx.fillRect(cState.px, h - 22, cState.pw, 12);
+                ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(cState.bx, cState.by, 8, 0, Math.PI * 2); ctx.fill();
+            }
+
+            rafId = requestAnimationFrame(loopCanvas);
+        }
+
+        window.switchChatRoom = switchChatRoom;
+        window.sendChatMessage = sendChatMessage;
+        window.inputState = inputState;
+
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            if (e.key === ' ' && running) { e.preventDefault(); window.triggerPrimaryAction(); }
+            if (e.key === 'ArrowUp' && running && activeGameObj.key === 'mario_runner') { e.preventDefault(); window.triggerPrimaryAction(); }
+            if (running && activeGameObj.key === 'neon_snake') {
+                if ((e.key === 'ArrowUp' || e.key === 'w') && cState.dir.y !== 1) cState.dir = { x: 0, y: -1 };
+                if ((e.key === 'ArrowDown' || e.key === 's') && cState.dir.y !== -1) cState.dir = { x: 0, y: 1 };
+                if ((e.key === 'ArrowLeft' || e.key === 'a') && cState.dir.x !== 1) cState.dir = { x: -1, y: 0 };
+                if ((e.key === 'ArrowRight' || e.key === 'd') && cState.dir.x !== -1) cState.dir = { x: 1, y: 0 };
+            }
+        });
+        window.addEventListener('keyup', (e) => { keys[e.key] = false; });
+        window.addEventListener('resize', resizeCanvas);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('header-user-name').textContent = currentUser;
+            const senderInp = document.getElementById('chat-sender-input');
+            if (senderInp && !senderInp.value) senderInp.value = currentUser;
+
+            initFlowingCanvas();
+            updateTotalBest();
+            renderGameSelectorGrid();
+            window.selectGameByKey(GAMES_CATALOG[0].key);
+            renderChatFeed();
+            announcePresence();
+            initRealtimeBackend();
+
+            setInterval(announcePresence, 5000);
+        });
+    </script>
+</body>
+</html>
